@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.configuration.mapper.UserMapper">
+
+    <resultMap id="baseResult" type="user">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="password" column="pwd"></result>
+    </resultMap>
+
+<!--    <select id="getUserList" resultType="user">-->
+<!--        select * from user-->
+<!--    </select>-->
+
+    <select id="getUserList" resultMap="baseResult">
+        select * from user
+    </select>
+
+    <select id="getUserById" parameterType="int" resultType="com.ryan.configuration.entity.User">
+        select * from user where id = #{id}
+    </select>
+
+    <insert id="addUser" parameterType="com.ryan.configuration.entity.User">
+        insert into user(id, name, pwd) value (#{id}, #{name}, #{pwd})
+    </insert>
+
+    <update id="updateUserById">
+        update user set name=#{param2}, pwd=#{param3} where id=#{param1}
+    </update>
+
+    <delete id="deleteUserById">
+        delete from user where id = #{id}
+    </delete>
+
+    <update id="updateById" parameterType="map">
+        update user set name=#{userName}, pwd=#{newPassword} where id=#{userId}
+    </update>
+
+<!--    <select id="getUserLike" resultType="com.ryan.mybatis.entity.User">-->
+<!--        select * from user where name like #{value}-->
+<!--    </select>-->
+
+    <select id="getUserLike" resultType="com.ryan.configuration.entity.User">
+        select * from user where name like "%"#{value}"%"
+    </select>
+</mapper>
