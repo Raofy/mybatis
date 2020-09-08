@@ -4,9 +4,136 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ryan.dynamicsql.mapper.BlogMapper">
 
+    <resultMap id="baseResult" type="com.ryan.dynamicsql.entity.Blog">
+        <id property="id" column="id"></id>
+        <result property="title" column="title"></result>
+        <result property="author" column="author"></result>
+        <result property="createTime" column="create_time"></result>
+        <result property="views" column="views"></result>
+    </resultMap>
 
     <insert id="addBlog">
         insert into mybatis.blog(id, title, author, create_time, views) value
         (#{id,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{author,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{views})
     </insert>
+
+    <select id="getAll" resultType="com.ryan.dynamicsql.entity.Blog">
+        select * from blog
+    </select>
+
+<!--    <select id="fuzzyQuery" resultMap="baseResult">-->
+<!--        select *-->
+<!--        from blog-->
+<!--        where author = #{name}-->
+<!--        <if test="text != null">-->
+<!--            and title like concat('%',#{text,jdbcType=VARCHAR},'%')-->
+<!--        </if>-->
+<!--    </select>-->
+
+<!--    <select id="fuzzyQuery" resultMap="baseResult">-->
+<!--        <bind name="title" value="'%'+text+'%'"/>-->
+<!--        select *-->
+<!--        from blog-->
+<!--        where author = #{name}-->
+<!--        <if test="title != null">-->
+<!--            and title like #{title}-->
+<!--        </if>-->
+<!--    </select>-->
+
+<!--    <select id="fuzzyQuery" resultMap="baseResult">-->
+<!--        <bind name="title" value="'%'+text+'%'"/>-->
+<!--        select *-->
+<!--        from blog-->
+<!--        <where>-->
+<!--            <if test="name != null">-->
+<!--                author = #{name}-->
+<!--            </if>-->
+<!--            <if test="title != null">-->
+<!--                and title like #{title}-->
+<!--            </if>-->
+<!--        </where>-->
+
+<!--    </select>-->
+
+    <select id="fuzzyQuery" resultMap="baseResult">
+        <bind name="title" value="'%'+text+'%'"/>
+        select *
+        from blog
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="name != null">
+                author = #{name}
+            </if>
+            <if test="title != null">
+                and title like #{title}
+            </if>
+        </trim>
+    </select>
+
+    <select id="fuzzyQueryPro" resultMap="baseResult">
+        <bind name="title" value="'%'+text+'%'"/>
+        select *
+        from blog
+        where author = #{name}
+        <if test="title != null">
+            and title like #{title}
+        </if>
+        <if test="views >= 0">
+            and views >= 0
+        </if>
+    </select>
+
+    <select id="chooseQuery" resultMap="baseResult">
+        select *
+        from blog
+        where 1 = 1
+        <choose>
+            <when test="name != null">
+                and author = #{name}
+            </when>
+            <when test="text != null">
+                and title like concat('%', #{text,jdbcType=VARCHAR}, '%')
+            </when>
+            <when test="views >= 0">
+                and views >= #{views}
+            </when>
+            <otherwise></otherwise>
+        </choose>
+    </select>
+
+<!--    <update id="update">-->
+<!--        update blog-->
+<!--        <set>-->
+<!--            <if test="name != null">-->
+<!--                author = #{name},-->
+<!--            </if>-->
+<!--            <if test="text != null">-->
+<!--                title = #{text,jdbcType=VARCHAR}-->
+<!--            </if>-->
+<!--        </set>-->
+<!--        where id = #{id}-->
+<!--    </update>-->
+
+    <update id="update">
+        update blog
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">
+                author = #{name},
+            </if>
+            <if test="text != null">
+                title = #{text,jdbcType=VARCHAR}
+            </if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <insert id="bulkAdd">
+        insert into blog(id, title, author, create_time, views)
+        values
+        <foreach item="item" index="index" collection="blog"
+                 separator=",">
+            (#{item.id}, #{item.title}, #{item.author}, #{item.createTime}, #{item.views})
+        </foreach>
+    </insert>
+
+
 </mapper>
